@@ -1,4 +1,4 @@
-# Crypto Science - Application de Portefeuille de Crypto-monnaies
+# Crypto Science - Application de Portefeuille de Crypto-monnaies dy Duc-Son Nguyen
 
 ![Licence MIT](https://img.shields.io/badge/licence-MIT-blue.svg)
 ![React](https://img.shields.io/badge/React-18.x-61DAFB)
