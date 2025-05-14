@@ -11,10 +11,13 @@ import Transactions from './pages/Transactions';
 import Settings from './pages/Settings';
 import NotFound from './pages/NotFound';
 import Login from './pages/Login';
+import DebugPanel from './components/debug/DebugPanel';
 import './styles/main.css';
 import './styles/dashboard.css';
 
 const App = () => {
+    const isDevelopment = import.meta.env.DEV;
+
   return (
     <Provider store={store}>
       <BrowserRouter>
@@ -29,6 +32,10 @@ const App = () => {
             <Route path="*" element={<NotFound />} />
           </Route>
         </Routes>
+
+        {/* Ajouter le panneau de débogage uniquement en mode développement */}
+        {isDevelopment && <DebugPanel />}
+
       </BrowserRouter>
     </Provider>
   );
