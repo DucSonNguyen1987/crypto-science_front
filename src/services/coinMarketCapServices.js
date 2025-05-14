@@ -1,203 +1,208 @@
-// src/services/coinMarketCapServices.js
-import axios from "axios";
+// src/services/coinMarketCapService.js
+/**
+ * Service d'intégration avec l'API CoinMarketCap
+ * 
+ * Ce service gère toutes les interactions avec l'API CoinMarketCap.
+ * En production, il ferait des appels API réels via un backend sécurisé.
+ * Pour le développement, il peut être configuré pour utiliser un proxy local.
+ */
 
-// Configurer l'API CoinMarketCap
-const COINMARKETCAP_API_KEY = import.meta.env.VITE_COINMARKETCAP_API_KEY;
-const COINMARKETCAP_API_URL = 'https://pro-api.coinmarketcap.com/v1';
+import axios from 'axios';
+import { API_CONFIG } from './apiConfig';
+import mockCryptoData from './mockCryptoData';
 
-// Instance axios configurée
+// Créer une instance axios configurée pour l'API CoinMarketCap
 const coinMarketCapApi = axios.create({
-    baseURL: COINMARKETCAP_API_URL,
-    headers: {
-        'X-CMC_PRO_API_KEY': COINMARKETCAP_API_KEY,
-        'Accept': 'application/json',
-    }
+  baseURL: API_CONFIG.coinMarketCap.baseUrl,
+  headers: {
+    'Accept': 'application/json'
+  }
+});
+
+// Ajouter un intercepteur pour ajouter la clé API si nécessaire
+coinMarketCapApi.interceptors.request.use(config => {
+  // Si nous n'utilisons pas le proxy (qui ajoute la clé automatiquement), ajouter la clé API
+  if (config.baseURL === API_CONFIG.coinMarketCap.realBaseUrl) {
+    config.headers['X-CMC_PRO_API_KEY'] = API_CONFIG.coinMarketCap.apiKey;
+  }
+  return config;
 });
 
 /**  
- * Service pour récupérer les derniers prix pour les cryptos spécifiées
+ * Récupère les derniers prix pour les crypto-monnaies spécifiées
  * @param {number[]} cryptoIds - Tableau d'IDs de crypto-monnaies
  * @returns {Promise<Object>} - Données de prix formatées
  */
 export const getLatestPrices = async (cryptoIds) => {
-    try {
-        console.log('Fetching prices for:', cryptoIds);
-        // Vérifier qu'il y a des IDs à récupérer
-        if (!cryptoIds || cryptoIds.length === 0) {
-            console.error('No crypto IDs provided to getLatestPrices');
-            return {};
-        }
-
-        const response = await coinMarketCapApi.get('/cryptocurrency/quotes/latest', {
-            params: {
-                id: cryptoIds.join(','),
-                convert: 'EUR'
-            }
-        });
-
-        console.log('API Response:', response.data);
-        return response.data.data;
-    } catch (error) {
-        console.error('Error fetching crypto prices:', error.response ? error.response.data : error.message);
-        // Renvoyer un objet vide plutôt que de propager l'erreur
-        return {};
+  try {
+    console.log('Fetching real prices for:', cryptoIds);
+    
+    // Vérifier qu'il y a des IDs à récupérer
+    if (!cryptoIds || cryptoIds.length === 0) {
+      console.error('No crypto IDs provided to getLatestPrices');
+      return {};
     }
-};
 
-/**  
- * Service pour récupérer les métadonnées des crypto-monnaies 
- * @param {number[]} cryptoIds - Tableau d'IDs de crypto-monnaies
- * @returns {Promise<Object>} - Métadonnées des crypto-monnaies
- */
-export const getCryptoMetadata = async (cryptoIds) => {
-    try {
-        if (!cryptoIds || cryptoIds.length === 0) {
-            console.error('No crypto IDs provided to getCryptoMetadata');
-            return {};
-        }
+    const response = await coinMarketCapApi.get('/cryptocurrency/quotes/latest', {
+      params: {
+        id: cryptoIds.join(','),
+        convert: API_CONFIG.coinMarketCap.defaultCurrency
+      }
+    });
 
-        const response = await coinMarketCapApi.get('/cryptocurrency/info', {
-            params: {
-                id: cryptoIds.join(',')
-            }
-        });
-        return response.data.data;
-    } catch (error) {
-        console.error('Error fetching crypto metadata:', error.response ? error.response.data : error.message);
-        return {};
-    }
+    console.log('API Response:', response.data);
+    
+    // Formater les données pour correspondre à notre structure attendue
+    const formattedData = {};
+    
+    Object.entries(response.data.data).forEach(([id, cryptoData]) => {
+      formattedData[id] = {
+        id: Number(id),
+        name: cryptoData.name,
+        symbol: cryptoData.symbol,
+        price: cryptoData.quote[API_CONFIG.coinMarketCap.defaultCurrency].price,
+        percent_change_24h: cryptoData.quote[API_CONFIG.coinMarketCap.defaultCurrency].percent_change_24h,
+        percent_change_7d: cryptoData.quote[API_CONFIG.coinMarketCap.defaultCurrency].percent_change_7d,
+        percent_change_30d: cryptoData.quote[API_CONFIG.coinMarketCap.defaultCurrency].percent_change_30d,
+        market_cap: cryptoData.quote[API_CONFIG.coinMarketCap.defaultCurrency].market_cap,
+        volume_24h: cryptoData.quote[API_CONFIG.coinMarketCap.defaultCurrency].volume_24h,
+        last_updated: cryptoData.last_updated
+      };
+    });
+    
+    return formattedData;
+  } catch (error) {
+    console.error('Error fetching crypto prices:', error.response ? error.response.data : error.message);
+    
+    // En cas d'erreur, utiliser les données simulées comme fallback
+    console.warn('Falling back to mock data');
+    return mockCryptoData.getMockPrices(cryptoIds);
+  }
 };
 
 /**
- * Service pour récupérer le classement des cryptos
+ * Récupère les métadonnées des crypto-monnaies
+ * @param {number[]} cryptoIds - Tableau d'IDs de crypto-monnaies
+ * @returns {Promise<Object>} - Métadonnées
+ */
+export const getCryptoMetadata = async (cryptoIds) => {
+  try {
+    if (!cryptoIds || cryptoIds.length === 0) {
+      console.error('No crypto IDs provided to getCryptoMetadata');
+      return {};
+    }
+
+    const response = await coinMarketCapApi.get('/cryptocurrency/info', {
+      params: {
+        id: cryptoIds.join(',')
+      }
+    });
+    
+    return response.data.data;
+  } catch (error) {
+    console.error('Error fetching crypto metadata:', error.response ? error.response.data : error.message);
+    
+    // Générer des métadonnées simulées simples
+    const mockData = {};
+    cryptoIds.forEach(id => {
+      mockData[id] = {
+        id,
+        name: `Crypto ${id}`,
+        symbol: `C${id}`,
+        description: `Description for crypto ${id}`,
+        logo: `https://example.com/logo/${id}.png`
+      };
+    });
+    
+    return mockData;
+  }
+};
+
+/**
+ * Récupère le classement des crypto-monnaies
  * @param {number} limit - Nombre de crypto-monnaies à récupérer
  * @returns {Promise<Array>} - Liste des crypto-monnaies
  */
 export const getTopCryptos = async (limit = 100) => {
-    try {
-        const response = await coinMarketCapApi.get('/cryptocurrency/listings/latest', {
-            params: {
-                limit,
-                convert: 'EUR'
-            }
-        });
-        return response.data.data;
-    } catch (error) {
-        console.error('Error fetching top cryptos:', error.response ? error.response.data : error.message);
-        return [];
-    }
-};
-
-/** 
- * Génère des données historiques fictives pour une crypto-monnaie
- * Utilisé comme fallback quand l'API ne fournit pas de données historiques
- * @param {number} cryptoId - ID de la crypto-monnaie
- * @param {string} timeFrame - Période (1d, 7d, 30d, 90d, 365d)
- * @returns {Promise<Object>} - Données historiques simulées
- */
-export const getHistoricalData = async (cryptoId, timeFrame = '30d') => {
-    console.log(`Generating simulated historical data for crypto ${cryptoId}, timeframe ${timeFrame}`);
+  try {
+    const response = await coinMarketCapApi.get('/cryptocurrency/listings/latest', {
+      params: {
+        limit,
+        convert: API_CONFIG.coinMarketCap.defaultCurrency
+      }
+    });
     
-    try {
-        // D'abord, récupérer le prix actuel pour avoir une référence
-        const currentPriceData = await getLatestPrices([cryptoId]);
-        
-        if (!currentPriceData || !currentPriceData[cryptoId]) {
-            throw new Error('Failed to get current price for simulation');
-        }
-        
-        const currentPrice = currentPriceData[cryptoId].quote.EUR.price;
-        const currentDate = new Date();
-        
-        // Déterminer le nombre de points de données en fonction de la période
-        let days;
-        switch (timeFrame) {
-            case '1d': days = 1; break;
-            case '7d': days = 7; break;
-            case '30d': days = 30; break;
-            case '90d': days = 90; break;
-            case '365d': days = 365; break;
-            default: days = 30;
-        }
-        
-        // Calculer le pas de temps (en heures)
-        const timeStep = timeFrame === '1d' ? 1 : 24; // Points par jour
-        const dataPoints = timeFrame === '1d' ? 24 : days;
-        
-        // Générer des données historiques simulées
-        const prices = [];
-        let price = currentPrice * 0.85; // Commencer à environ -15% du prix actuel
-        
-        for (let i = 0; i < dataPoints; i++) {
-            const date = new Date(currentDate);
-            date.setHours(date.getHours() - (dataPoints - i) * timeStep);
-            
-            // Simuler une tendance haussière avec une petite variation aléatoire
-            const randomFactor = 1 + ((Math.random() * 0.02) - 0.01); // -1% à +1%
-            const trendFactor = 1 + (0.15 * (i / dataPoints)); // Tendance haussière progressive
-            
-            price = price * randomFactor * trendFactor;
-            
-            prices.push({
-                date: date.toISOString(),
-                price: price,
-                volume: Math.floor(Math.random() * 1000000) + 500000, // Volume simulé
-                market_cap: price * (Math.floor(Math.random() * 1000000) + 10000000) // Market cap simulé
-            });
-        }
-        
-        return prices;
-    } catch (error) {
-        console.error('Error generating historical data:', error);
-        // Retourner un tableau vide au lieu de propager l'erreur
-        return [];
-    }
+    // Formater les données pour correspondre à notre structure attendue
+    return response.data.data.map(crypto => ({
+      id: crypto.id,
+      name: crypto.name,
+      symbol: crypto.symbol,
+      price: crypto.quote[API_CONFIG.coinMarketCap.defaultCurrency].price,
+      percent_change_24h: crypto.quote[API_CONFIG.coinMarketCap.defaultCurrency].percent_change_24h,
+      percent_change_7d: crypto.quote[API_CONFIG.coinMarketCap.defaultCurrency].percent_change_7d,
+      percent_change_30d: crypto.quote[API_CONFIG.coinMarketCap.defaultCurrency].percent_change_30d,
+      market_cap: crypto.quote[API_CONFIG.coinMarketCap.defaultCurrency].market_cap,
+      volume_24h: crypto.quote[API_CONFIG.coinMarketCap.defaultCurrency].volume_24h,
+      circulating_supply: crypto.circulating_supply,
+      last_updated: crypto.last_updated
+    }));
+  } catch (error) {
+    console.error('Error fetching top cryptos:', error.response ? error.response.data : error.message);
+    
+    // En cas d'erreur, utiliser les données simulées comme fallback
+    console.warn('Falling back to mock data');
+    return mockCryptoData.getMockTopCryptos(limit);
+  }
 };
 
 /**
- * Récupère les données de marché globales
+ * Récupère les données historiques
+ * Note: L'API CoinMarketCap nécessite un plan payant pour les données historiques
+ * Cette implémentation est présente pour démontrer l'architecture
+ * @param {number} cryptoId - ID de la crypto-monnaie
+ * @param {string} timeFrame - Période (1d, 7d, 30d, 90d, 365d)
+ * @returns {Promise<Array>} - Données historiques
+ */
+export const getHistoricalData = async (cryptoId, timeFrame = '30d') => {
+  try {
+    // Note: Cette API nécessite un plan payant
+    // L'implémentation réelle dépendrait de votre abonnement CoinMarketCap
+    console.warn('Historical data requires a paid CoinMarketCap plan');
+    
+    // Utiliser les données simulées comme fallback
+    return mockCryptoData.getMockHistoricalData(cryptoId, timeFrame);
+  } catch (error) {
+    console.error('Error fetching historical data:', error.response ? error.response.data : error.message);
+    return mockCryptoData.getMockHistoricalData(cryptoId, timeFrame);
+  }
+};
+
+/**
+ * Récupère les données du marché global
  * @returns {Promise<Object>} - Données de marché globales
  */
 export const getGlobalMarketData = async () => {
-    try {
-        const response = await coinMarketCapApi.get('/global-metrics/quotes/latest', {
-            params: {
-                convert: 'EUR'
-            }
-        });
-        return response.data.data;
-    } catch (error) {
-        console.error('Error fetching global market data:', error.response ? error.response.data : error.message);
-        return null;
-    }
-};
-
-/**
- * Recherche des crypto-monnaies par nom ou symbole
- * @param {string} query - Terme de recherche
- * @param {number} limit - Nombre maximum de résultats
- * @returns {Promise<Object>} - Résultats de recherche
- */
-export const searchCryptos = async (query, limit = 10) => {
-    try {
-        const response = await coinMarketCapApi.get('/cryptocurrency/map', {
-            params: {
-                symbol: query,
-                limit
-            }
-        });
-        return response.data.data;
-    } catch (error) {
-        console.error('Error searching cryptos:', error.response ? error.response.data : error.message);
-        return [];
-    }
+  try {
+    const response = await coinMarketCapApi.get('/global-metrics/quotes/latest', {
+      params: {
+        convert: API_CONFIG.coinMarketCap.defaultCurrency
+      }
+    });
+    
+    return response.data.data;
+  } catch (error) {
+    console.error('Error fetching global market data:', error.response ? error.response.data : error.message);
+    
+    // En cas d'erreur, utiliser les données simulées comme fallback
+    console.warn('Falling back to mock data');
+    return mockCryptoData.getMockGlobalMarketData();
+  }
 };
 
 export default {
-    getLatestPrices,
-    getCryptoMetadata,
-    getTopCryptos,
-    getHistoricalData,
-    getGlobalMarketData,
-    searchCryptos
+  getLatestPrices,
+  getCryptoMetadata,
+  getTopCryptos,
+  getHistoricalData,
+  getGlobalMarketData
 };

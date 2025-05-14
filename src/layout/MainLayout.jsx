@@ -59,7 +59,7 @@ const MainLayout = () => {
               strokeLinejoin="round"
             />
           </svg>
-          CryptoWallet
+          Crypto Science
         </div>
         
         <nav className="sidebar-nav">

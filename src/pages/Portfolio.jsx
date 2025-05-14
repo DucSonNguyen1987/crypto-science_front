@@ -3,7 +3,6 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { 
   fetchCryptoPrices, 
-  fetchHistoricalData 
 } from '../features/market/marketSlice';
 import { removeFromWallet } from '../features/wallet/walletSlice';
 import { 
@@ -72,6 +71,14 @@ const Portfolio = () => {
   // Valeur totale du portefeuille
   const portfolioValue = useMemo(() => calculatePortfolioValue(), [calculatePortfolioValue]);
   
+  // Générer une couleur basée sur l'ID
+  // IMPORTANT: Déplacé cette fonction avant son utilisation dans portfolioAllocation
+  const getRandomColor = (id) => {
+    // Utiliser l'ID comme seed pour générer une couleur cohérente
+    const hue = (id * 137.5) % 360; // Multiplier par un nombre premier pour une meilleure distribution
+    return `hsl(${hue}, 70%, 50%)`;
+  };
+  
   // Calculer la répartition du portefeuille
   const portfolioAllocation = useMemo(() => {
     if (!assets.length || !Object.keys(prices).length) return [];
@@ -91,13 +98,6 @@ const Portfolio = () => {
       };
     }).sort((a, b) => b.value - a.value); // Trier par valeur décroissante
   }, [assets, prices, portfolioValue]);
-  
-  // Générer une couleur basée sur l'ID
-  const getRandomColor = (id) => {
-    // Utiliser l'ID comme seed pour générer une couleur cohérente
-    const hue = (id * 137.5) % 360; // Multiplier par un nombre premier pour une meilleure distribution
-    return `hsl(${hue}, 70%, 50%)`;
-  };
   
   // Gérer la vente d'un actif
   const handleSellAsset = (asset) => {

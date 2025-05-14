@@ -476,7 +476,7 @@ const Dashboard = () => {
                                     <tbody>
                                         {transactions.slice(0, 4).map(transaction => {
                                             const crypto = prices[transaction.cryptoId] || {};
-                                            const date = new Date(transaction.date);
+                                            const date = new Date(transaction.date)
 
                                             return (
                                                 <tr key={transaction.id}>
@@ -489,8 +489,8 @@ const Dashboard = () => {
                                                     <td>{formatCurrency(transaction.price)}</td>
                                                     <td>{date.toLocaleTimeString('fr-FR')}</td>
                                                 </tr>
-                                            );
-                                        })};
+                                            )
+                                        })}
                                     </tbody>
                                 </table>
                             </div>

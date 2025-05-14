@@ -1,476 +1,467 @@
-// src/pages/Portfolio.jsx
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+// src/pages/Explore.jsx
+import React, { useState, useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { 
-  fetchCryptoPrices, 
-  fetchHistoricalData 
+import {
+  getTopCryptos,
+  fetchCryptoPrices,
+  selectTopCryptos,
+  selectMarketLoading
 } from '../features/market/marketSlice';
-import { removeFromWallet } from '../features/wallet/walletSlice';
-import { 
-  FiPieChart, 
-  FiBarChart2, 
-  FiList, 
-  FiTrendingUp, 
-  FiTrendingDown, 
-  FiTrash2, 
+import { addToWallet } from '../features/wallet/walletSlice';
+import {
+  FiSearch,
+  FiFilter,
+  FiPlus,
+  FiTrendingUp,
+  FiTrendingDown,
   FiDollarSign,
-  FiEdit
+  FiBarChart2,
+  FiArrowUp,
+  FiArrowDown,
+  FiX,
+  FiInfo,
+  FiRefreshCw
 } from 'react-icons/fi';
-import { 
-  PieChart, 
-  Pie, 
-  Cell, 
-  ResponsiveContainer, 
-  Tooltip as RechartsTooltip
-} from 'recharts';
-
 import '../styles/Explore.css';
 
-const Portfolio = () => {
+/**
+ * Composant d'exploration des crypto-monnaies
+ * Permet de découvrir et d'ajouter de nouvelles crypto-monnaies au portefeuille
+ */
+const Explore = () => {
   const dispatch = useDispatch();
+
+  // Sélecteurs Redux
+  const topCryptos = useSelector(selectTopCryptos);
+  const loading = useSelector(selectMarketLoading);
   const { assets } = useSelector((state) => state.wallet);
-  const { prices, loading } = useSelector((state) => state.market);
-  
+
   // États locaux
-  const [activeView, setActiveView] = useState('list'); // 'list', 'pie', 'allocation'
-  const [selectedAsset, setSelectedAsset] = useState(null);
-  const [showSellModal, setShowSellModal] = useState(false);
-  const [sellAmount, setSellAmount] = useState('');
-  
-  // Charger les prix des crypto-monnaies
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterType, setFilterType] = useState('all'); // 'all', 'gainers', 'losers'
+  const [sortConfig, setSortConfig] = useState({ key: 'market_cap', direction: 'desc' });
+  const [showBuyModal, setShowBuyModal] = useState(false);
+  const [selectedCrypto, setSelectedCrypto] = useState(null);
+  const [buyAmount, setBuyAmount] = useState('');
+
+  // Charger les top crypto-monnaies au démarrage
   useEffect(() => {
-    if (assets.length > 0) {
-      const cryptoIds = assets.map(asset => asset.id);
-      dispatch(fetchCryptoPrices(cryptoIds));
-      
-      // Mettre à jour les prix toutes les 60 secondes
-      const interval = setInterval(() => {
+    // Charger la liste initiale des crypto-monnaies
+    dispatch(getTopCryptos(100));
+
+    // Rafraîchir les données périodiquement
+    const interval = setInterval(() => {
+      // Si nous avons des crypto-monnaies chargées
+      if (topCryptos && topCryptos.length > 0) {
+        // Extraire les IDs pour mettre à jour les prix
+        const cryptoIds = topCryptos.map(crypto => crypto.id);
+
+        // Mettre à jour les prix en temps réel
         dispatch(fetchCryptoPrices(cryptoIds));
-      }, 60000);
-      
-      return () => clearInterval(interval);
-    }
-  }, [assets, dispatch]);
-  
+      } else {
+        // Si nous n'avons pas encore de données, charger la liste
+        dispatch(getTopCryptos(100));
+      }
+    }, 60000); // Mettre à jour toutes les 60 secondes
+
+    return () => clearInterval(interval);
+  }, [dispatch, topCryptos]);
+
   // Formatage des valeurs monétaires
   const formatCurrency = useCallback((value) => {
-    return value.toLocaleString('fr-FR', { 
-      style: 'currency', 
+    return value.toLocaleString('fr-FR', {
+      style: 'currency',
       currency: 'EUR',
       maximumFractionDigits: 2
     });
   }, []);
-  
-  // Calculer la valeur totale du portefeuille
-  const calculatePortfolioValue = useCallback(() => {
-    return assets.reduce((total, asset) => {
-      const price = prices[asset.id]?.price || 0;
-      return total + (asset.amount * price);
-    }, 0);
-  }, [assets, prices]);
-  
-  // Valeur totale du portefeuille
-  const portfolioValue = useMemo(() => calculatePortfolioValue(), [calculatePortfolioValue]);
-  
-  // Calculer la répartition du portefeuille
-  const portfolioAllocation = useMemo(() => {
-    if (!assets.length || !Object.keys(prices).length) return [];
-    
-    return assets.map(asset => {
-      const price = prices[asset.id] || {};
-      const value = asset.amount * (price.price || 0);
-      const percentage = (value / portfolioValue) * 100;
-      
-      return {
-        id: asset.id,
-        name: price.name || 'Crypto',
-        symbol: price.symbol || 'CRYPTO',
-        value,
-        percentage,
-        color: getRandomColor(asset.id) // Fonction pour générer une couleur basée sur l'ID
-      };
-    }).sort((a, b) => b.value - a.value); // Trier par valeur décroissante
-  }, [assets, prices, portfolioValue]);
-  
-  // Générer une couleur basée sur l'ID
-  const getRandomColor = (id) => {
-    // Utiliser l'ID comme seed pour générer une couleur cohérente
-    const hue = (id * 137.5) % 360; // Multiplier par un nombre premier pour une meilleure distribution
-    return `hsl(${hue}, 70%, 50%)`;
-  };
-  
-  // Gérer la vente d'un actif
-  const handleSellAsset = (asset) => {
-    setSelectedAsset(asset);
-    setSellAmount('');
-    setShowSellModal(true);
-  };
-  
-  // Confirmer la vente
-  const handleConfirmSell = () => {
-    const parsedAmount = parseFloat(sellAmount);
-    if (selectedAsset && parsedAmount > 0) {
-      // Vérifier que le montant n'excède pas la quantité disponible
-      if (parsedAmount <= selectedAsset.amount) {
-        dispatch(removeFromWallet({
-          id: selectedAsset.id,
-          amount: parsedAmount,
-          price: prices[selectedAsset.id]?.price || 0
-        }));
-        setShowSellModal(false);
-        
-        // Afficher une notification de succès (à implémenter)
-      }
+
+  // Formatage des grands nombres
+  const formatLargeNumber = useCallback((num) => {
+    if (num >= 1000000000) {
+      return `${(num / 1000000000).toFixed(2)} Md`;
+    } else if (num >= 1000000) {
+      return `${(num / 1000000).toFixed(2)} M`;
+    } else if (num >= 1000) {
+      return `${(num / 1000).toFixed(2)} k`;
+    }
+    return num.toString();
+  }, []);
+
+  // Filtrer et trier les crypto-monnaies
+  const getFilteredAndSortedCryptos = useCallback(() => {
+    // Filtrer par terme de recherche et type
+    let filtered = [...topCryptos];
+
+    if (searchTerm) {
+      filtered = filtered.filter(crypto =>
+        crypto.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        crypto.symbol.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    if (filterType === 'gainers') {
+      filtered = filtered.filter(crypto => crypto.percent_change_24h > 0);
+    } else if (filterType === 'losers') {
+      filtered = filtered.filter(crypto => crypto.percent_change_24h < 0);
+    }
+
+    // Trier les résultats
+    if (sortConfig.key) {
+      filtered.sort((a, b) => {
+        if (a[sortConfig.key] < b[sortConfig.key]) {
+          return sortConfig.direction === 'asc' ? -1 : 1;
+        }
+        if (a[sortConfig.key] > b[sortConfig.key]) {
+          return sortConfig.direction === 'asc' ? 1 : -1;
+        }
+        return 0;
+      });
+    }
+
+    return filtered;
+  }, [topCryptos, searchTerm, filterType, sortConfig]);
+
+  //Obtenir les MAJ immédiates des prix
+  const handleRefreshPrices = () => {
+    if (topCryptos && topCryptos.length > 0) {
+      const cryptoIds = topCryptos.map(crypto => crypto.id);
+      dispatch(fetchCryptoPrices(cryptoIds));
     }
   };
-  
-  // Fonction d'aide pour le formatage des pourcentages
-  const formatPercentage = (value) => {
-    return `${value.toFixed(2)}%`;
+
+  // Gérer le changement de tri
+  const handleSort = (key) => {
+    setSortConfig(prevConfig => {
+      if (prevConfig.key === key) {
+        return { key, direction: prevConfig.direction === 'asc' ? 'desc' : 'asc' };
+      }
+      return { key, direction: 'desc' };
+    });
   };
-  
+
+  // Ouvrir le modal d'achat pour une crypto-monnaie
+  const handleBuyCrypto = (crypto) => {
+    setSelectedCrypto(crypto);
+    setBuyAmount('');
+    setShowBuyModal(true);
+  };
+
+  // Confirmer l'achat
+  const handleConfirmBuy = () => {
+    const parsedAmount = parseFloat(buyAmount);
+    if (selectedCrypto && parsedAmount > 0) {
+      dispatch(addToWallet({
+        id: selectedCrypto.id,
+        amount: parsedAmount,
+        price: selectedCrypto.price
+      }));
+
+      setShowBuyModal(false);
+
+      // Dans une application réelle, afficher une notification de succès
+      alert(`${parsedAmount} ${selectedCrypto.symbol} ajoutés à votre portefeuille!`);
+    }
+  };
+
+  // Vérifier si une crypto est déjà dans le portefeuille
+  const isInPortfolio = (cryptoId) => {
+    return assets.some(asset => asset.id === cryptoId);
+  };
+
+  // Afficher l'icône de variation selon la tendance
+  const TrendIcon = ({ value, className = "" }) => {
+    return value >= 0
+      ? <FiTrendingUp className={`trend-icon ${className}`} />
+      : <FiTrendingDown className={`trend-icon ${className}`} />;
+  };
+
+  // Les données filtrées et triées pour l'affichage
+  const filteredCryptos = getFilteredAndSortedCryptos();
+
   return (
-    <div className="portfolio-container">
-      <h1 className="portfolio-title">Mon Portefeuille</h1>
-      
-      {/* Résumé du portefeuille */}
-      <div className="portfolio-summary-card glass-effect">
-        <div className="summary-item total-value">
-          <span className="summary-label">Valeur totale</span>
-          <span className="summary-value">{formatCurrency(portfolioValue)}</span>
+    <div className="explore-container">
+      <h1 className="explore-title">Explorer les Crypto-monnaies</h1>
+
+      {/* Section de recherche et filtres */}
+      <div className="explore-controls glass-effect">
+        <div className="search-bar">
+          <FiSearch className="search-icon" />
+          <input
+            type="text"
+            className="search-input"
+            placeholder="Rechercher par nom ou symbole..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
-        <div className="summary-item asset-count">
-          <span className="summary-label">Actifs</span>
-          <span className="summary-value">{assets.length}</span>
-        </div>
-        <div className="summary-item">
-          <span className="summary-label">Rendement 24h</span>
-          <span className="summary-value">
-            {/* Calculer le rendement sur 24h (simplifié) */}
-            <span className="change-positive">+2.14%</span>
-          </span>
+
+        {/* Filtres par type */}
+        <div className="filter-tabs">
+          <button
+            className={`filter-tab ${filterType === 'all' ? 'active' : ''}`}
+            onClick={() => setFilterType('all')}
+          >
+            Toutes
+          </button>
+          <button
+            className={`filter-tab ${filterType === 'gainers' ? 'active' : ''}`}
+            onClick={() => setFilterType('gainers')}
+          >
+            Gainers
+          </button>
+          <button
+            className={`filter-tab ${filterType === 'losers' ? 'active' : ''}`}
+            onClick={() => setFilterType('losers')}
+          >
+            Losers
+          </button>
+
+          <button
+            className="refresh-btn"
+            onClick={handleRefreshPrices}
+            disabled={loading}
+          >
+            <FiRefreshCw className={loading ? 'spin' : ''} />
+            Rafraîchir les prix
+          </button>
         </div>
       </div>
-      
-      {/* Contrôles de vue */}
-      <div className="view-controls">
-        <button 
-          className={`view-control-btn ${activeView === 'list' ? 'active' : ''}`}
-          onClick={() => setActiveView('list')}
-          aria-label="Vue liste"
-        >
-          <FiList />
-          <span>Liste</span>
-        </button>
-        <button 
-          className={`view-control-btn ${activeView === 'pie' ? 'active' : ''}`}
-          onClick={() => setActiveView('pie')}
-          aria-label="Vue camembert"
-        >
-          <FiPieChart />
-          <span>Répartition</span>
-        </button>
-        <button 
-          className={`view-control-btn ${activeView === 'allocation' ? 'active' : ''}`}
-          onClick={() => setActiveView('allocation')}
-          aria-label="Vue allocation"
-        >
-          <FiBarChart2 />
-          <span>Allocation</span>
-        </button>
-      </div>
-      
-      {/* Contenu principal basé sur la vue active */}
-      <div className="portfolio-content glass-effect">
-        {loading && !Object.keys(prices).length ? (
+
+      {/* Liste des crypto-monnaies */}
+      <div className="crypto-table-container glass-effect">
+        {loading ? (
           <div className="loading">
             <div className="loading-spinner"></div>
-            <span>Chargement du portefeuille...</span>
+            <span>Chargement des données...</span>
           </div>
-        ) : assets.length === 0 ? (
+        ) : filteredCryptos.length === 0 ? (
           <div className="empty-state">
             <div className="empty-state-icon">
-              <FiPieChart />
+              <FiFilter />
             </div>
-            <h3 className="empty-state-title">Portefeuille vide</h3>
+            <h3 className="empty-state-title">Aucun résultat</h3>
             <p className="empty-state-description">
-              Vous n'avez pas encore d'actifs dans votre portefeuille. Commencez par explorer et ajouter des crypto-monnaies.
+              Aucune crypto-monnaie ne correspond à vos critères de recherche.
             </p>
-            <button 
-              className="btn btn-primary"
-              onClick={() => window.location.href = '/explore'}
+            <button
+              className="btn btn-secondary"
+              onClick={() => {
+                setSearchTerm('');
+                setFilterType('all');
+              }}
             >
-              Explorer les crypto-monnaies
+              Réinitialiser les filtres
             </button>
           </div>
         ) : (
-          <>
-            {/* Vue Liste */}
-            {activeView === 'list' && (
-              <div className="asset-list">
-                <table className="portfolio-table">
-                  <thead>
-                    <tr>
-                      <th>Actif</th>
-                      <th>Quantité</th>
-                      <th>Prix</th>
-                      <th>Valeur</th>
-                      <th>24h %</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {assets.map((asset) => {
-                      const price = prices[asset.id] || {};
-                      const value = asset.amount * (price.price || 0);
-                      const change24h = price.percent_change_24h || 0;
-                      
-                      return (
-                        <tr key={asset.id}>
-                          <td className="asset-name-cell">
-                            <div className="asset-icon">
-                              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path 
-                                  d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" 
-                                  stroke="currentColor" 
-                                  strokeWidth="2" 
-                                  strokeLinecap="round" 
-                                  strokeLinejoin="round"
-                                />
-                              </svg>
-                            </div>
-                            <div>
-                              <div className="asset-name">{price.name || 'Crypto'}</div>
-                              <div className="asset-symbol">{price.symbol || 'CRYPTO'}</div>
-                            </div>
-                          </td>
-                          <td>{asset.amount}</td>
-                          <td>{formatCurrency(price.price || 0)}</td>
-                          <td>{formatCurrency(value)}</td>
-                          <td className={change24h >= 0 ? 'change-positive' : 'change-negative'}>
-                            {change24h >= 0 ? <FiTrendingUp className="trend-icon" /> : <FiTrendingDown className="trend-icon" />}
-                            {Math.abs(change24h).toFixed(2)}%
-                          </td>
-                          <td className="action-buttons">
-                            <button 
-                              className="btn-icon btn-action"
-                              onClick={() => handleSellAsset(asset)}
-                              aria-label={`Vendre ${price.name || 'Crypto'}`}
-                            >
-                              <FiDollarSign />
-                            </button>
-                            <button 
-                              className="btn-icon btn-action btn-danger"
-                              onClick={() => handleSellAsset({...asset, amount: asset.amount})}
-                              aria-label={`Supprimer ${price.name || 'Crypto'}`}
-                            >
-                              <FiTrash2 />
-                            </button>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            )}
-            
-            {/* Vue Camembert */}
-            {activeView === 'pie' && (
-              <div className="pie-chart-view">
-                <div className="chart-container">
-                  <ResponsiveContainer width="100%" height={300}>
-                    <PieChart>
-                      <Pie
-                        data={portfolioAllocation}
-                        cx="50%"
-                        cy="50%"
-                        labelLine={false}
-                        outerRadius={100}
-                        fill="#8884d8"
-                        dataKey="value"
+          <table className="crypto-table">
+            <thead>
+              <tr>
+                <th className="rank-column">#</th>
+                <th className="sortable" onClick={() => handleSort('name')}>
+                  Nom {sortConfig.key === 'name' && (sortConfig.direction === 'asc' ? <FiArrowUp /> : <FiArrowDown />)}
+                </th>
+                <th className="sortable" onClick={() => handleSort('price')}>
+                  Prix {sortConfig.key === 'price' && (sortConfig.direction === 'asc' ? <FiArrowUp /> : <FiArrowDown />)}
+                </th>
+                <th className="sortable" onClick={() => handleSort('percent_change_24h')}>
+                  24h % {sortConfig.key === 'percent_change_24h' && (sortConfig.direction === 'asc' ? <FiArrowUp /> : <FiArrowDown />)}
+                </th>
+                <th className="sortable" onClick={() => handleSort('market_cap')}>
+                  Cap. Marché {sortConfig.key === 'market_cap' && (sortConfig.direction === 'asc' ? <FiArrowUp /> : <FiArrowDown />)}
+                </th>
+                <th className="sortable" onClick={() => handleSort('volume_24h')}>
+                  Volume (24h) {sortConfig.key === 'volume_24h' && (sortConfig.direction === 'asc' ? <FiArrowUp /> : <FiArrowDown />)}
+                </th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredCryptos.map((crypto, index) => (
+                <tr key={crypto.id}>
+                  <td className="rank-column">{index + 1}</td>
+                  <td className="crypto-name-cell">
+                    <div className="crypto-icon">
+                      {/* Utiliser une couleur générée par l'ID pour l'icône */}
+                      <svg
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                        style={{ color: `hsl(${(crypto.id * 137.5) % 360}, 70%, 50%)` }}
                       >
-                        {portfolioAllocation.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.color} />
-                        ))}
-                      </Pie>
-                      <RechartsTooltip 
-                        formatter={(value) => [formatCurrency(value), 'Valeur']}
-                        labelFormatter={(index) => portfolioAllocation[index].name}
-                      />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
-                <div className="pie-legend">
-                  {portfolioAllocation.map((asset) => (
-                    <div className="legend-item" key={asset.id}>
-                      <div className="legend-color" style={{ backgroundColor: asset.color }}></div>
-                      <div className="legend-details">
-                        <div className="legend-name">
-                          <span>{asset.name}</span>
-                          <span className="legend-percentage">{formatPercentage(asset.percentage)}</span>
-                        </div>
-                        <div className="legend-value">{formatCurrency(asset.value)}</div>
-                      </div>
+                        <path
+                          d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
                     </div>
-                  ))}
-                </div>
-              </div>
-            )}
-            
-            {/* Vue Allocation */}
-            {activeView === 'allocation' && (
-              <div className="allocation-view">
-                {portfolioAllocation.map((asset) => (
-                  <div className="allocation-item" key={asset.id}>
-                    <div className="allocation-header">
-                      <div className="allocation-name">
-                        <div className="asset-icon" style={{ backgroundColor: `${asset.color}20` }}>
-                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path 
-                              d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" 
-                              stroke={asset.color} 
-                              strokeWidth="2" 
-                              strokeLinecap="round" 
-                              strokeLinejoin="round"
-                            />
-                          </svg>
-                        </div>
-                        <div>
-                          <div className="asset-name">{asset.name}</div>
-                          <div className="asset-symbol">{asset.symbol}</div>
-                        </div>
-                      </div>
-                      <div className="allocation-value">
-                        <div className="asset-value">{formatCurrency(asset.value)}</div>
-                        <div className="asset-percentage">{formatPercentage(asset.percentage)}</div>
-                      </div>
+                    <div>
+                      <div className="crypto-name">{crypto.name}</div>
+                      <div className="crypto-symbol">{crypto.symbol}</div>
                     </div>
-                    <div className="allocation-bar-container">
-                      <div 
-                        className="allocation-bar"
-                        style={{ 
-                          width: `${asset.percentage}%`,
-                          backgroundColor: asset.color
-                        }}
-                      ></div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </>
+                    {isInPortfolio(crypto.id) && <span className="in-portfolio-badge">En portefeuille</span>}
+                  </td>
+                  <td>{formatCurrency(crypto.price)}</td>
+                  <td className={crypto.percent_change_24h >= 0 ? 'change-positive' : 'change-negative'}>
+                    <TrendIcon value={crypto.percent_change_24h} />
+                    {Math.abs(crypto.percent_change_24h).toFixed(2)}%
+                  </td>
+                  <td>{formatCurrency(crypto.market_cap)}</td>
+                  <td>{formatCurrency(crypto.volume_24h)}</td>
+                  <td>
+                    <button
+                      className="btn-add"
+                      onClick={() => handleBuyCrypto(crypto)}
+                      title={isInPortfolio(crypto.id) ? "Ajouter plus" : "Ajouter au portefeuille"}
+                    >
+                      <FiPlus />
+                      <span>Ajouter</span>
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         )}
       </div>
-      
-      {/* Modal de vente */}
-      {showSellModal && selectedAsset && (
-        <div className="modal-overlay" onClick={() => setShowSellModal(false)}>
+
+      {/* Affichage mobile alternatif */}
+      <div className="crypto-grid">
+        {!loading && filteredCryptos.map(crypto => (
+          <div className="crypto-card glass-effect" key={crypto.id}>
+            <div className="crypto-header">
+              <div className="crypto-name-cell">
+                <div className="crypto-icon">
+                  <svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    style={{ color: `hsl(${(crypto.id * 137.5) % 360}, 70%, 50%)` }}
+                  >
+                    <path
+                      d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="crypto-name">{crypto.name}</h3>
+                  <div className="crypto-symbol">{crypto.symbol}</div>
+                </div>
+              </div>
+              <div className={crypto.percent_change_24h >= 0 ? 'change-positive' : 'change-negative'}>
+                <TrendIcon value={crypto.percent_change_24h} />
+                {Math.abs(crypto.percent_change_24h).toFixed(2)}%
+              </div>
+            </div>
+            <div className="crypto-details">
+              <div className="detail-row">
+                <span className="detail-label">Prix</span>
+                <span className="detail-value">{formatCurrency(crypto.price)}</span>
+              </div>
+              <div className="detail-row">
+                <span className="detail-label">Cap. Marché</span>
+                <span className="detail-value">{formatLargeNumber(crypto.market_cap)}</span>
+              </div>
+              <div className="detail-row">
+                <span className="detail-label">Volume (24h)</span>
+                <span className="detail-value">{formatLargeNumber(crypto.volume_24h)}</span>
+              </div>
+            </div>
+            <button
+              className="btn btn-primary btn-block"
+              onClick={() => handleBuyCrypto(crypto)}
+            >
+              <FiPlus /> Ajouter au portefeuille
+            </button>
+          </div>
+        ))}
+      </div>
+
+      {/* Modal d'achat */}
+      {showBuyModal && selectedCrypto && (
+        <div className="modal-overlay" onClick={() => setShowBuyModal(false)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h3 className="modal-title">
-                Vendre {prices[selectedAsset.id]?.name || 'Crypto'}
+                Acheter {selectedCrypto.name} ({selectedCrypto.symbol})
               </h3>
-              <button 
+              <button
                 className="modal-close"
-                onClick={() => setShowSellModal(false)}
+                onClick={() => setShowBuyModal(false)}
                 aria-label="Fermer"
               >
-                &times;
+                <FiX />
               </button>
             </div>
             <div className="modal-body">
-              <div className="asset-info">
-                <div className="info-row">
-                  <span className="info-label">Prix actuel</span>
-                  <span className="info-value">
-                    {formatCurrency(prices[selectedAsset.id]?.price || 0)}
-                  </span>
-                </div>
-                <div className="info-row">
-                  <span className="info-label">Quantité détenue</span>
-                  <span className="info-value">
-                    {selectedAsset.amount} {prices[selectedAsset.id]?.symbol || 'CRYPTO'}
-                  </span>
-                </div>
-                <div className="info-row">
-                  <span className="info-label">Valeur totale</span>
-                  <span className="info-value">
-                    {formatCurrency(selectedAsset.amount * (prices[selectedAsset.id]?.price || 0))}
-                  </span>
+              <div className="current-price">
+                <div className="price-label">Prix actuel</div>
+                <div className="price-value">{formatCurrency(selectedCrypto.price)}</div>
+                <div className={`price-change ${selectedCrypto.percent_change_24h >= 0 ? 'change-positive' : 'change-negative'}`}>
+                  <TrendIcon value={selectedCrypto.percent_change_24h} className="small" />
+                  {Math.abs(selectedCrypto.percent_change_24h).toFixed(2)}% (24h)
                 </div>
               </div>
-              
-              <div className="form-group amount-group">
-                <label htmlFor="sell-amount" className="form-label">
-                  Quantité à vendre
+
+              <div className="form-group">
+                <label htmlFor="buy-amount" className="form-label">
+                  Quantité à acheter
                 </label>
-                <div className="input-with-actions">
-                  <input 
-                    type="number" 
-                    id="sell-amount"
+                <div className="input-with-symbol">
+                  <input
+                    type="number"
+                    id="buy-amount"
                     className="form-control"
-                    value={sellAmount}
-                    onChange={(e) => setSellAmount(e.target.value)}
-                    placeholder="Saisir la quantité..."
+                    value={buyAmount}
+                    onChange={(e) => setBuyAmount(e.target.value)}
+                    placeholder="0.00"
                     min="0"
-                    max={selectedAsset.amount}
                     step="any"
                     autoFocus
                   />
-                  <div className="input-actions">
-                    <button 
-                      className="action-btn"
-                      onClick={() => setSellAmount((selectedAsset.amount / 4).toString())}
-                    >
-                      25%
-                    </button>
-                    <button 
-                      className="action-btn"
-                      onClick={() => setSellAmount((selectedAsset.amount / 2).toString())}
-                    >
-                      50%
-                    </button>
-                    <button 
-                      className="action-btn"
-                      onClick={() => setSellAmount(selectedAsset.amount.toString())}
-                    >
-                      100%
-                    </button>
-                  </div>
+                  <span className="input-symbol">{selectedCrypto.symbol}</span>
                 </div>
               </div>
-              
-              {sellAmount && (
-                <div className="sell-summary">
-                  <div className="summary-row">
-                    <span className="summary-label">Quantité à vendre</span>
-                    <span className="summary-value">
-                      {parseFloat(sellAmount)} {prices[selectedAsset.id]?.symbol || 'CRYPTO'}
-                    </span>
-                  </div>
-                  <div className="summary-row">
-                    <span className="summary-label">Valeur estimée</span>
-                    <span className="summary-value highlight">
-                      {formatCurrency(parseFloat(sellAmount) * (prices[selectedAsset.id]?.price || 0))}
-                    </span>
-                  </div>
+
+              {buyAmount && (
+                <div className="estimated-value">
+                  <div className="value-label">Valeur estimée</div>
+                  <div className="value-amount">{formatCurrency(parseFloat(buyAmount) * selectedCrypto.price)}</div>
                 </div>
               )}
+
+              <div className="info-note">
+                <FiInfo className="info-icon" />
+                <div>
+                  Les crypto-monnaies sont des actifs volatils. N'investissez que ce que vous pouvez vous permettre de perdre.
+                </div>
+              </div>
             </div>
             <div className="modal-footer">
-              <button 
+              <button
                 className="btn btn-secondary"
-                onClick={() => setShowSellModal(false)}
+                onClick={() => setShowBuyModal(false)}
               >
                 Annuler
               </button>
-              <button 
+              <button
                 className="btn btn-primary"
-                onClick={handleConfirmSell}
-                disabled={!sellAmount || parseFloat(sellAmount) <= 0 || parseFloat(sellAmount) > selectedAsset.amount}
+                onClick={handleConfirmBuy}
+                disabled={!buyAmount || parseFloat(buyAmount) <= 0}
               >
-                Vendre
+                Acheter
               </button>
             </div>
           </div>
@@ -480,4 +471,4 @@ const Portfolio = () => {
   );
 };
 
-export default Portfolio;
+export default Explore;
