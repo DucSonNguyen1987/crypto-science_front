@@ -1,0 +1,387 @@
+/* transactions.css - Styles pour la page de transactions */
+
+.transactions-container {
+  padding: var(--spacing-lg);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.transactions-title {
+  font-weight: 700;
+  color: var(--text-dark);
+  margin-bottom: var(--spacing-lg);
+}
+
+/* Statistiques des transactions */
+.transactions-stats {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+  background-color: rgba(255, 255, 255, 0.7);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+  backdrop-filter: blur(15px);
+  box-shadow: var(--shadow-md);
+  border: var(--border-thin);
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  min-width: 150px;
+  text-align: center;
+  padding: var(--spacing-md);
+  border-radius: var(--border-radius-md);
+  background-color: rgba(255, 255, 255, 0.5);
+}
+
+.stat-label {
+  font-size: var(--font-size-small);
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-xs);
+}
+
+.stat-value {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+}
+
+.stat-value.buy {
+  color: var(--color-success);
+}
+
+.stat-value.sell {
+  color: var(--color-error);
+}
+
+/* Contrôles et filtres */
+.transactions-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--spacing-md);
+  background-color: rgba(255, 255, 255, 0.7);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+  backdrop-filter: blur(15px);
+  box-shadow: var(--shadow-md);
+  border: var(--border-thin);
+}
+
+.search-bar {
+  position: relative;
+  flex-grow: 1;
+  max-width: 400px;
+}
+
+.search-input {
+  width: 100%;
+  padding: var(--spacing-sm) var(--spacing-lg) var(--spacing-sm) var(--spacing-xxl);
+  border-radius: var(--border-radius-md);
+  border: var(--border-thin);
+  background-color: rgba(255, 255, 255, 0.7);
+  font-size: var(--font-size-small);
+  transition: var(--transition-fast);
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(0, 208, 158, 0.1);
+  background-color: rgba(255, 255, 255, 0.9);
+}
+
+.search-icon {
+  position: absolute;
+  top: 50%;
+  left: var(--spacing-sm);
+  transform: translateY(-50%);
+  color: var(--text-secondary);
+}
+
+.controls-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.btn-icon {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--border-radius-sm);
+  border: var(--border-thin);
+  background-color: rgba(255, 255, 255, 0.5);
+  color: var(--text-secondary);
+  font-size: var(--font-size-small);
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.btn-icon:hover {
+  background-color: rgba(0, 208, 158, 0.1);
+}
+
+.filter-toggle {
+  position: relative;
+}
+
+.chevron {
+  margin-left: var(--spacing-xs);
+  transition: transform 0.3s ease;
+}
+
+.chevron.open {
+  transform: rotate(180deg);
+}
+
+.download-btn {
+  background-color: rgba(0, 208, 158, 0.1);
+  color: var(--color-primary);
+  border-color: rgba(0, 208, 158, 0.2);
+}
+
+.download-btn:hover {
+  background-color: rgba(0, 208, 158, 0.2);
+}
+
+.download-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Filtres avancés */
+.advanced-filters {
+  background-color: rgba(255, 255, 255, 0.7);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+  backdrop-filter: blur(15px);
+  box-shadow: var(--shadow-md);
+  border: var(--border-thin);
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.filter-group {
+  margin-bottom: var(--spacing-md);
+}
+
+.filter-label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: var(--spacing-xs);
+  color: var(--text-dark);
+}
+
+.filter-options {
+  display: flex;
+  gap: var(--spacing-xs);
+}
+
+.filter-btn {
+  padding: var(--spacing-xs) var(--spacing-md);
+  border-radius: var(--border-radius-sm);
+  border: var(--border-thin);
+  background-color: rgba(255, 255, 255, 0.5);
+  color: var(--text-secondary);
+  font-size: var(--font-size-small);
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.filter-btn:hover {
+  background-color: rgba(0, 208, 158, 0.1);
+}
+
+.filter-btn.active {
+  background-color: var(--color-primary);
+  color: var(--text-light);
+  border-color: var(--color-primary);
+}
+
+.date-filters {
+  display: flex;
+  gap: var(--spacing-md);
+}
+
+.date-input-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.date-input-container label {
+  font-size: var(--font-size-small);
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-xs);
+}
+
+.date-input {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--border-radius-sm);
+  border: var(--border-thin);
+  background-color: rgba(255, 255, 255, 0.5);
+  font-size: var(--font-size-small);
+  color: var(--text-dark);
+}
+
+.date-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(0, 208, 158, 0.1);
+}
+
+.filter-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: var(--spacing-md);
+}
+
+/* Tableau des transactions */
+.transactions-list {
+  background-color: rgba(255, 255, 255, 0.7);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-lg);
+  backdrop-filter: blur(15px);
+  box-shadow: var(--shadow-md);
+  border: var(--border-thin);
+}
+
+.transactions-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.transactions-table th,
+.transactions-table td {
+  padding: var(--spacing-md);
+  text-align: left;
+}
+
+.transactions-table th {
+  background-color: rgba(52, 117, 145, 0.05);
+  color: var(--text-secondary);
+  font-weight: 600;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.transactions-table th.sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.transactions-table th.sortable:hover {
+  background-color: rgba(0, 208, 158, 0.05);
+}
+
+.transactions-table th span {
+  margin-right: var(--spacing-xs);
+}
+
+.transactions-table tbody tr {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  transition: var(--transition-fast);
+}
+
+.transactions-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.transactions-table tbody tr:hover {
+  background-color: rgba(0, 208, 158, 0.05);
+}
+
+/* Cellules spéciales */
+.crypto-name-cell {
+  display: flex;
+  align-items: center;
+}
+
+.crypto-icon.small {
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  border-radius: 50%;
+  background-color: rgba(0, 208, 158, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: var(--spacing-xs);
+}
+
+/* États vides */
+.empty-state {
+  text-align: center;
+  padding: var(--spacing-xxl);
+}
+
+.empty-state-icon {
+  font-size: 48px;
+  color: var(--color-secondary);
+  opacity: 0.4;
+  margin-bottom: var(--spacing-md);
+}
+
+.empty-state-title {
+  font-size: var(--font-size-lg);
+  margin-bottom: var(--spacing-sm);
+}
+
+.empty-state-description {
+  color: var(--text-secondary);
+  max-width: 400px;
+  margin: 0 auto var(--spacing-md);
+}
+
+/* Responsivité */
+@media (max-width: 767px) {
+  .transactions-container {
+    padding: var(--spacing-md);
+  }
+  
+  .transactions-stats {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+  
+  .stat-item {
+    width: 100%;
+  }
+  
+  .transactions-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .search-bar {
+    max-width: none;
+    margin-bottom: var(--spacing-sm);
+  }
+  
+  .date-filters {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+  
+  .transactions-table {
+    display: block;
+    overflow-x: auto;
+  }
+}

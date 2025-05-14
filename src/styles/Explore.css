@@ -1,0 +1,414 @@
+/* explore.css - Styles spécifiques à la page d'exploration */
+
+.explore-container {
+  padding: var(--spacing-lg);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.explore-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-lg);
+}
+
+.explore-title {
+  margin-bottom: 0;
+  font-weight: 700;
+  color: var(--text-dark);
+}
+
+.explore-controls {
+  margin-bottom: var(--spacing-lg);
+}
+
+/* Barre de recherche */
+.search-bar {
+  position: relative;
+  margin-bottom: var(--spacing-md);
+}
+
+.search-input {
+  width: 100%;
+  padding: var(--spacing-md) var(--spacing-lg) var(--spacing-md) var(--spacing-xxl);
+  border-radius: var(--border-radius-lg);
+  border: var(--border-thin);
+  background-color: rgba(255, 255, 255, 0.7);
+  font-size: var(--font-size-body);
+  transition: var(--transition-fast);
+  backdrop-filter: blur(10px);
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(0, 208, 158, 0.1);
+  background-color: rgba(255, 255, 255, 0.9);
+}
+
+.search-icon {
+  position: absolute;
+  top: 50%;
+  left: var(--spacing-md);
+  transform: translateY(-50%);
+  color: var(--text-secondary);
+}
+
+/* Tabs de filtres */
+.filter-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-md);
+}
+
+.filter-tabs {
+  display: flex;
+  gap: var(--spacing-sm);
+  overflow-x: auto;
+  padding-bottom: var(--spacing-xs);
+}
+
+.filter-tab {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--border-radius-sm);
+  border: var(--border-thin);
+  background-color: rgba(255, 255, 255, 0.5);
+  color: var(--text-secondary);
+  font-size: var(--font-size-small);
+  cursor: pointer;
+  transition: var(--transition-fast);
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+.filter-tab:hover {
+  background-color: rgba(0, 208, 158, 0.1);
+}
+
+.filter-tab.active {
+  background-color: var(--color-primary);
+  color: var(--text-light);
+  border-color: var(--color-primary);
+}
+
+/* Tableau des crypto-monnaies */
+.crypto-table-container {
+  overflow-x: auto;
+  border-radius: var(--border-radius-lg);
+  background-color: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(15px);
+  box-shadow: var(--shadow-md);
+  border: var(--border-thin);
+  margin-bottom: var(--spacing-xl);
+}
+
+.crypto-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.crypto-table th,
+.crypto-table td {
+  padding: var(--spacing-md);
+  text-align: left;
+}
+
+.crypto-table th {
+  background-color: rgba(52, 117, 145, 0.05);
+  color: var(--text-secondary);
+  font-weight: 600;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  backdrop-filter: blur(10px);
+}
+
+.crypto-table th.sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.crypto-table th.sortable:hover {
+  background-color: rgba(0, 208, 158, 0.05);
+}
+
+.crypto-table th span {
+  margin-right: var(--spacing-xs);
+}
+
+.crypto-table tbody tr {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  transition: var(--transition-fast);
+}
+
+.crypto-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.crypto-table tbody tr:hover {
+  background-color: rgba(0, 208, 158, 0.05);
+}
+
+/* Style des cellules du tableau */
+.crypto-name-cell {
+  display: flex;
+  align-items: center;
+}
+
+.crypto-name-cell .crypto-icon {
+  margin-right: var(--spacing-sm);
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: rgba(0, 208, 158, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.crypto-name {
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-bottom: 2px;
+}
+
+.crypto-symbol {
+  font-size: var(--font-size-small);
+  color: var(--text-secondary);
+}
+
+.change-positive {
+  color: var(--color-success);
+}
+
+.change-negative {
+  color: var(--color-error);
+}
+
+/* Bouton d'ajout */
+.btn-add {
+  background-color: rgba(0, 208, 158, 0.1);
+  color: var(--color-primary);
+  border: 1px solid rgba(0, 208, 158, 0.2);
+}
+
+.btn-add:hover {
+  background-color: rgba(0, 208, 158, 0.2);
+  transform: scale(1.1);
+}
+
+/* Grille alternative pour mobile */
+.crypto-grid {
+  display: none;
+}
+
+.crypto-card .crypto-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-sm);
+}
+
+.crypto-card .crypto-header h3 {
+  margin: 0;
+  font-size: var(--font-size-body);
+}
+
+.crypto-card .crypto-details {
+  margin-top: var(--spacing-sm);
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-xs);
+}
+
+.detail-label {
+  color: var(--text-secondary);
+  font-size: var(--font-size-small);
+}
+
+.detail-value {
+  font-weight: 500;
+}
+
+/* Modal d'ajout au portefeuille */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(29, 49, 82, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: var(--z-index-modal-backdrop);
+  backdrop-filter: blur(5px);
+}
+
+.modal {
+  width: 90%;
+  max-width: 450px;
+  background-color: rgba(255, 255, 255, 0.95);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  backdrop-filter: blur(15px);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-lg);
+  border-bottom: var(--border-thin);
+}
+
+.modal-title {
+  margin: 0;
+  font-size: var(--font-size-lg);
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.modal-body {
+  padding: var(--spacing-lg);
+}
+
+.modal-footer {
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-top: var(--border-thin);
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-md);
+}
+
+/* Style des éléments du modal */
+.current-price {
+  background-color: rgba(255, 255, 255, 0.5);
+  border-radius: var(--border-radius-md);
+  padding: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.price-label {
+  color: var(--text-secondary);
+  font-size: var(--font-size-small);
+  margin-bottom: var(--spacing-xs);
+}
+
+.price-value {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  margin-bottom: var(--spacing-xs);
+}
+
+.price-change {
+  font-size: var(--font-size-small);
+  font-weight: 500;
+}
+
+.input-with-symbol {
+  position: relative;
+}
+
+.input-symbol {
+  position: absolute;
+  right: var(--spacing-md);
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.estimated-value {
+  background-color: rgba(0, 208, 158, 0.05);
+  border-radius: var(--border-radius-md);
+  padding: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+  text-align: center;
+  border: 1px solid rgba(0, 208, 158, 0.1);
+}
+
+.value-label {
+  color: var(--text-secondary);
+  font-size: var(--font-size-small);
+  margin-bottom: var(--spacing-xs);
+}
+
+.value-amount {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.info-note {
+  display: flex;
+  align-items: flex-start;
+  background-color: rgba(52, 117, 145, 0.05);
+  border-radius: var(--border-radius-md);
+  padding: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+  font-size: var(--font-size-small);
+  color: var(--text-secondary);
+}
+
+.info-icon {
+  margin-right: var(--spacing-sm);
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--color-info);
+}
+
+/* Adaptations pour mobiles */
+@media (max-width: 767px) {
+  .explore-container {
+    padding: var(--spacing-md);
+  }
+  
+  .crypto-table-container {
+    display: none;
+  }
+  
+  .crypto-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+  }
+  
+  .mobile-only {
+    display: block;
+  }
+  
+  .desktop-only {
+    display: none;
+  }
+  
+  .filter-tabs {
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: var(--spacing-xs);
+  }
+}
+
+/* Effet de chargement */
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xxl);
+  color: var(--text-secondary);
+}
