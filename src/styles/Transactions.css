@@ -106,7 +106,7 @@
 
 .controls-actions {
   display: flex;
-  gap: var(--spacing-sm);
+  gap: 2vw;
 }
 
 .btn-icon {
@@ -368,11 +368,12 @@
   .transactions-controls {
     flex-direction: column;
     align-items: stretch;
+    justify-items: center;
   }
   
   .search-bar {
     max-width: none;
-    margin-bottom: var(--spacing-sm);
+    margin-bottom: 5vh;
   }
   
   .date-filters {
@@ -383,5 +384,14 @@
   .transactions-table {
     display: block;
     overflow-x: auto;
+  }
+}
+
+@media (min-width: 1024px) {
+  /* Pour les écrans larges, on garde 2 colonnes comme demandé */
+  .crypto-grid {
+    grid-template-columns: repeat(2, 1fr);
+    max-width: 900px;
+    margin: 0 auto;
   }
 }

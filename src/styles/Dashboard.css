@@ -161,6 +161,7 @@
 /* Styles améliorés pour les cartes crypto */
 .crypto-card {
   display: flex;
+  flex-direction: row;
   align-items: center;
   padding: var(--spacing-md);
   background-color: rgba(255, 255, 255, 0.5);

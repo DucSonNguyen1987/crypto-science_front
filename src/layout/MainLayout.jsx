@@ -12,6 +12,8 @@ import {
   FiX 
 } from 'react-icons/fi';
 
+import Logo from '../../public/Logo.svg'
+
 const MainLayout = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
@@ -36,29 +38,11 @@ const MainLayout = () => {
       {/* Sidebar */}
       <aside className={`sidebar ${mobileMenuOpen ? 'show' : ''}`}>
         <div className="sidebar-logo">
-          <svg 
-            width="24" 
-            height="24" 
-            viewBox="0 0 24 24" 
-            fill="none" 
-            xmlns="http://www.w3.org/2000/svg"
-            style={{ marginRight: '8px' }}
-          >
-            <path 
-              d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" 
-              stroke="currentColor" 
-              strokeWidth="2" 
-              strokeLinecap="round" 
-              strokeLinejoin="round"
-            />
-            <path 
-              d="M9 8h6m-6 4h6m-6 4h6" 
-              stroke="currentColor" 
-              strokeWidth="2" 
-              strokeLinecap="round" 
-              strokeLinejoin="round"
-            />
-          </svg>
+          <img 
+            src="/Logo.svg" 
+            alt="Crypto Science Logo" 
+            style={{ marginRight: '8px', height: '24px' }}
+          />
           Crypto Science
         </div>
         
