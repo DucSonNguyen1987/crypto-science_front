@@ -159,11 +159,11 @@
 }
 
 /* Styles améliorés pour les cartes crypto */
-.crypto-card {
+.dashboard-container .crypto-card {
   display: flex;
   flex-direction: row;
   align-items: center;
-  justify-items: center;
+  justify-content: space-between;
   padding: var(--spacing-md);
   background-color: rgba(255, 255, 255, 0.5);
   border-radius: var(--border-radius-md);

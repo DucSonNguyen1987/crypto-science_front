@@ -707,18 +707,29 @@
   opacity: 0.5;
   margin-bottom: var(--spacing-lg);
 }
-
-/* Additional transitions for smooth UX */
-.crypto-card {
-  width: 100%;
-  overflow: hidden;
-  /* Ajouter une hauteur max pour uniformiser l'apparence */
-  max-height: 280px;
+.explore-container .crypto-card {
   display: flex;
   flex-direction: column;
-  transition:
-    transform 0.3s ease,
-    box-shadow 0.3s ease;
+  padding: var(--spacing-md);
+  background-color: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  transition: var(--transition-fast);
+  border-radius: var(--border-radius-md);
+  border: var(--border-thin);
+  height: 100%;
+}
+
+/* Additional style to adapt the crypto card header in Explore view */
+.explore-container .crypto-card .crypto-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+/* Ensure crypto icon is properly positioned in both views */
+.explore-container .crypto-icon {
+  margin-right: 0;
 }
 
 .crypto-card:hover {
