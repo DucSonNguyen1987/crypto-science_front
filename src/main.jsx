@@ -8,11 +8,11 @@ import { checkAuth } from './features/auth/authSlice';
 
 // Styles globaux
 import './styles/main.css';
-import './styles/dashboard.css';
-import './styles/explore.css';
-import './styles/portfolio.css';
+import './styles/Dashboard.css';
+import './styles/Explore.css';
+import './styles/Portfolio.css';
 import './styles/auth.css';
-import './styles/notfound.css';
+import './styles/Notfound.css';
 
 // Vérifier l'authentification au démarrage
 store.dispatch(checkAuth());
