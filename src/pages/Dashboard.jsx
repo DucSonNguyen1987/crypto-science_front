@@ -410,7 +410,7 @@ const Dashboard = () => {
                                     const change24h = price.percent_change_24h || 0;
 
                                     return (
-                                        <div className='crypto-card' key={asset.id}>
+                                        <div className='crypto-card dashboard-crypto-card' key={asset.id}>
 
                                             <div className='crypto-icon'>
                                                 <svg width="24" viewBox='0 0 24 24' fill="none" xmlns='http://www.w3.org/2000/svg'>

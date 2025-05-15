@@ -920,8 +920,6 @@ a:hover {
   padding: var(--spacing-md);
   margin-bottom: var(--spacing-md);
   display: flex;
-  flex-direction: row;
-  align-items: center;
   backdrop-filter: blur(10px);
   transition: var(--transition-fast);
   border: var(--border-thin);

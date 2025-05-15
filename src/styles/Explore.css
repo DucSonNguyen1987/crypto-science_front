@@ -707,6 +707,38 @@
   opacity: 0.5;
   margin-bottom: var(--spacing-lg);
 }
+
+/* Très haute spécificité pour la page Explore */
+html body .explore-container .crypto-card {
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100%;
+  padding: var(--spacing-md);
+  transition: var(--transition-fast);
+}
+
+/* Pour le header dans la vue Explore */
+html body .explore-container .crypto-card .crypto-header {
+  display: flex !important;
+  flex-direction: row !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  width: 100%;
+  margin-bottom: var(--spacing-sm);
+}
+
+/* Pour le contenu/details dans la vue Explore */
+html body .explore-container .crypto-card .crypto-details {
+  width: 100%;
+  margin-top: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+}
+
+/* Pour le bouton en bas dans la vue Explore */
+html body .explore-container .crypto-card .btn {
+  margin-top: auto;
+}
+
 .explore-container .crypto-card {
   display: flex;
   flex-direction: column;
@@ -732,7 +764,7 @@
   margin-right: 0;
 }
 
-.crypto-card:hover {
+.explore-container .crypto-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
 }

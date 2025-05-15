@@ -216,7 +216,7 @@ const Explore = () => {
         ) : (
           <div className="crypto-grid">
             {filteredCryptos.map(crypto => (
-              <div className="crypto-card glass-effect" key={crypto.id}>
+              <div className="crypto-card explore-crypto-card" key={crypto.id}>
                 <div className="crypto-header">
                   <div className="crypto-name-cell">
                     <div className="crypto-icon">

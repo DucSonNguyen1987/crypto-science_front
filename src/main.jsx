@@ -6,13 +6,15 @@ import { store } from './store';
 import { Provider } from 'react-redux';
 import { checkAuth } from './features/auth/authSlice';
 
-// Styles globaux
-import './styles/main.css';
-import './styles/Dashboard.css';
-import './styles/Explore.css';
-import './styles/Portfolio.css';
-import './styles/auth.css';
-import './styles/NotFound.css';
+// Styles globaux d'abord (de moins spécifique à plus spécifique)
+import './styles/main.css';         // 1. Styles de base généraux
+import './styles/auth.css';         // 2. Styles d'authentification
+import './styles/NotFound.css';     // 3. Styles de page non trouvée
+
+// Styles spécifiques aux fonctionnalités ensuite
+import './styles/Dashboard.css';    // 4. Dashboard styles 
+import './styles/Portfolio.css';    // 5. Portfolio styles
+import './styles/Explore.css';      // 6. Explore styles - dernier pour priorité supérieure
 
 // Vérifier l'authentification au démarrage
 store.dispatch(checkAuth());

@@ -158,6 +158,35 @@
   color: var(--color-error);
 }
 
+/* Très haute spécificité pour le tableau de bord */
+html body .dashboard-container .crypto-card {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: var(--spacing-md);
+  margin-bottom: var(--spacing-sm);
+  transition: var(--transition-fast);
+}
+
+/* Pour garantir que l'icône est bien positionnée */
+html body .dashboard-container .crypto-card .crypto-icon {
+  margin-right: var(--spacing-md) !important;
+  flex-shrink: 0;
+}
+
+/* Pour maintenir la mise en page des détails */
+html body .dashboard-container .crypto-card .crypto-details {
+  flex-grow: 1;
+  text-align: left;
+}
+
+/* Pour garder le prix aligné à droite */
+html body .dashboard-container .crypto-card .crypto-price {
+  text-align: right;
+  margin-left: auto;
+}
+
 /* Styles améliorés pour les cartes crypto */
 .dashboard-container .crypto-card {
   display: flex;
