@@ -1,3 +1,4 @@
+// Composant Explore.jsx avec résolution du problème d'affichage des symboles
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -22,7 +23,7 @@ import '../styles/Explore.css';
 const Explore = () => {
   const dispatch = useDispatch();
 
-  // Sélecteurs Redux avec plus de contrôle
+  // Sélecteurs Redux
   const topCryptos = useSelector(selectTopCryptos);
   const loading = useSelector(selectMarketLoading);
   const error = useSelector(selectMarketError);
@@ -34,23 +35,13 @@ const Explore = () => {
   const [showBuyModal, setShowBuyModal] = useState(false);
   const [selectedCrypto, setSelectedCrypto] = useState(null);
   const [buyAmount, setBuyAmount] = useState('');
-  const [loadAttempts, setLoadAttempts] = useState(0); // Compteur de tentatives de chargement
+  const [loadAttempts, setLoadAttempts] = useState(0);
 
   // Chargement initial avec gestion des erreurs améliorée
   useEffect(() => {
     console.log(`Loading top cryptos (attempt ${loadAttempts + 1})`);
-    dispatch(getTopCryptos(50)) // Réduire à 50 pour tester plus rapidement
-      .then(result => {
-        console.log('Top cryptos loading result:', result);
-        // Vérifions explicitement que les données sont présentes
-        if (!result?.payload || result?.payload.length === 0) {
-          console.warn('Empty payload received');
-        }
-      })
-      .catch(err => {
-        console.error('Dispatch error:', err);
-      });
-  }, [dispatch, loadAttempts]); // loadAttempts permettra de relancer le chargement
+    dispatch(getTopCryptos(50));
+  }, [dispatch, loadAttempts]);
 
   // Fonction pour formater les valeurs monétaires
   const formatCurrency = (value) => {
@@ -72,7 +63,12 @@ const Explore = () => {
     // Filtrer par terme de recherche et type
     return topCryptos.filter(crypto => {
       // Vérification des propriétés essentielles
-      if (!crypto || !crypto.name || !crypto.symbol) return false;
+      if (!crypto || !crypto.name) return false;
+      
+      // Assurons-nous que le symbole existe, sinon créons une valeur par défaut
+      if (!crypto.symbol) {
+        crypto.symbol = crypto.name.substring(0, 3).toUpperCase();
+      }
       
       // Filtre de recherche
       const matchesSearch = !searchTerm || 
@@ -124,13 +120,15 @@ const Explore = () => {
     return assets.some(asset => asset.id === cryptoId);
   };
 
-  // Information de débogage 
-  console.log('Explore rendering:', {
-    loadingState: loading,
-    errorState: error,
-    topCryptosCount: topCryptos?.length || 0,
-    filteredCryptosCount: filteredCryptos?.length || 0
-  });
+  // Assurez-vous que l'affichage du symbole est correct
+  const renderSymbol = (crypto) => {
+    // Vérifier si le symbole existe
+    if (!crypto.symbol) {
+      // Fallback si le symbole n'existe pas
+      return <span className="crypto-symbol">{crypto.name?.substring(0, 4).toUpperCase() || "CRYPTO"}</span>;
+    }
+    return <span className="crypto-symbol">{crypto.symbol}</span>;
+  };
 
   return (
     <div className="explore-container">
@@ -197,7 +195,7 @@ const Explore = () => {
         </div>
       )}
 
-      {/* Liste des crypto-monnaies (affichage simplifié) */}
+      {/* Liste des crypto-monnaies */}
       <div className="crypto-list-container glass-effect">
         {!loading && filteredCryptos.length === 0 ? (
           <div className="empty-state">
@@ -233,9 +231,10 @@ const Explore = () => {
                         />
                       </svg>
                     </div>
-                    <div>
-                      <h3 className="crypto-name">{crypto.name}</h3>
-                      <div className="crypto-symbol">{crypto.symbol}</div>
+                    <div className="crypto-text">
+                      <h3 className="crypto-name">{crypto.name || "Cryptomonnaie"}</h3>
+                      {/* Utiliser notre fonction de rendu sécurisée */}
+                      {renderSymbol(crypto)}
                     </div>
                   </div>
                   <div className={(crypto.percent_change_24h || 0) >= 0 ? 'change-positive' : 'change-negative'}>
@@ -268,13 +267,13 @@ const Explore = () => {
         )}
       </div>
 
-      {/* Modal d'achat simplifié */}
+      {/* Modal d'achat */}
       {showBuyModal && selectedCrypto && (
         <div className="modal-overlay" onClick={() => setShowBuyModal(false)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h3 className="modal-title">
-                Acheter {selectedCrypto.name} ({selectedCrypto.symbol})
+                Acheter {selectedCrypto.name} ({selectedCrypto.symbol || selectedCrypto.name?.substring(0, 3).toUpperCase() || "CRYPTO"})
               </h3>
               <button
                 className="modal-close"
@@ -339,6 +338,16 @@ const Explore = () => {
               </button>
             </div>
           </div>
+        </div>
+      )}
+      
+      {/* Indicateur de débogage - à enlever en production */}
+      {import.meta.env.NODE_ENV !== 'production' && (
+        <div className="debug-info">
+          <p>Cryptos chargées: {topCryptos?.length || 0}</p>
+          <p>Cryptos filtrées: {filteredCryptos?.length || 0}</p>
+          <p>Loading: {loading ? 'Oui' : 'Non'}</p>
+          <p>Error: {error ? 'Oui' : 'Non'}</p>
         </div>
       )}
     </div>

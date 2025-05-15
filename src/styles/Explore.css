@@ -31,7 +31,8 @@
 
 .search-input {
   width: 100%;
-  padding: var(--spacing-md) var(--spacing-lg) var(--spacing-md) var(--spacing-xxl);
+  padding: var(--spacing-md) var(--spacing-lg) var(--spacing-md)
+    var(--spacing-xxl);
   border-radius: var(--border-radius-lg);
   border: var(--border-thin);
   background-color: rgba(255, 255, 255, 0.7);
@@ -151,8 +152,9 @@
 
 /* Style des cellules du tableau */
 .crypto-name-cell {
-  display: flex;
+   display: flex;
   align-items: center;
+  margin-bottom: var(--spacing-xs);
 }
 
 .crypto-name-cell .crypto-icon {
@@ -166,15 +168,36 @@
   justify-content: center;
 }
 
+.crypto-icon svg {
+  width: 24px;
+  height: 24px;
+  display: block;
+}
+
 .crypto-name {
   font-weight: 600;
   color: var(--text-dark);
-  margin-bottom: 2px;
+  margin-bottom: 4px;
+  /* Assurer que le texte ne déborde pas */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 150px;
 }
 
 .crypto-symbol {
-  font-size: var(--font-size-small);
+  /* S'assurer que le texte est visible */
   color: var(--text-secondary);
+  font-size: var(--font-size-small);
+  opacity: 0.9;
+  font-weight: 500;
+  /* Ajouter un espacement pour une meilleure lisibilité */
+  margin-top: 2px;
+  /* Ajouter un style distinctif pour les rendre plus visibles */
+  background-color: rgba(0, 0, 0, 0.04);
+  padding: 1px 6px;
+  border-radius: 4px;
+  display: inline-block;
 }
 
 .change-positive {
@@ -218,6 +241,35 @@
   transform: scale(1.05);
 }
 
+
+/* Améliorer la visibilité des boutons */
+.btn-block {
+  width: 100%;
+  margin-top: auto; /* Pousse le bouton vers le bas de la carte */
+  padding: var(--spacing-sm) var(--spacing-md);
+}
+
+/* Assurer que les indicateurs de tendance sont visibles */
+.change-positive, .change-negative {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 500;
+  padding: 2px 6px;
+  border-radius: 4px;
+  /* Améliorer le contraste */
+  background-color: rgba(0, 208, 158, 0.1);
+}
+
+.change-positive {
+  color: var(--color-success);
+}
+
+.change-negative {
+  color: var(--color-error);
+  background-color: rgba(255, 120, 104, 0.1);
+}
+
 /* Badge "En portefeuille" */
 .in-portfolio-badge {
   background-color: rgba(52, 117, 145, 0.1);
@@ -254,6 +306,9 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: var(--spacing-sm);
+  margin-bottom: var(--spacing-sm);
+  padding-bottom: var(--spacing-sm);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .crypto-card .crypto-name-cell {
@@ -269,6 +324,8 @@
   display: flex;
   justify-content: space-between;
   margin-bottom: var(--spacing-xs);
+  /* Ajouter un peu d'espace pour que les valeurs ne soient pas trop serrées */
+  padding: var(--spacing-xs) 0;
 }
 
 .detail-label {
@@ -278,6 +335,8 @@
 
 .detail-value {
   font-weight: 500;
+  /* Assurer que les valeurs sont lisibles */
+  color: var(--text-dark);
 }
 
 /* Modal d'achat */
@@ -476,8 +535,12 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* Responsive */
@@ -485,15 +548,23 @@
   .explore-container {
     padding: var(--spacing-md);
   }
-  
+
   .crypto-table-container {
     display: none;
   }
-  
+
   .crypto-grid {
-    display: grid;
+    grid-template-columns: 1fr;
   }
   
+  .crypto-list-container {
+    padding: var(--spacing-md);
+  }
+  
+  .crypto-card {
+    max-height: none;
+  }
+
   .filter-tabs {
     width: 100%;
     overflow-x: auto;
@@ -563,6 +634,9 @@
 .crypto-list-container {
   padding: var(--spacing-lg);
   margin-bottom: var(--spacing-xl);
+  overflow: hidden;
+  width: 100%;
+  border-radius: var(--border-radius-lg);
 }
 
 /* Make sure mobile grid works correctly */
@@ -570,6 +644,10 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: var(--spacing-md);
+  width: 100%;
+  /* Empêcher le débordement des enfants */
+  overflow: visible;
+  padding-bottom: var(--spacing-md);
 }
 
 /* Ensuring that we have good loading indicators */
@@ -584,8 +662,12 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* Make buttons stand out more */
@@ -628,7 +710,15 @@
 
 /* Additional transitions for smooth UX */
 .crypto-card {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  width: 100%;
+  overflow: hidden;
+  /* Ajouter une hauteur max pour uniformiser l'apparence */
+  max-height: 280px;
+  display: flex;
+  flex-direction: column;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
 .crypto-card:hover {
