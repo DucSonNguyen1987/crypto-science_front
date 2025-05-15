@@ -12,7 +12,7 @@ import './styles/Dashboard.css';
 import './styles/Explore.css';
 import './styles/Portfolio.css';
 import './styles/auth.css';
-import './styles/Notfound.css';
+import './styles/NotFound.css';
 
 // Vérifier l'authentification au démarrage
 store.dispatch(checkAuth());
