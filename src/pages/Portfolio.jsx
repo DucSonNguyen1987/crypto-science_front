@@ -1,25 +1,25 @@
 // src/pages/Portfolio.jsx
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { 
-  fetchCryptoPrices, 
+import {
+  fetchCryptoPrices,
 } from '../features/market/marketSlice';
 import { removeFromWallet } from '../features/wallet/walletSlice';
-import { 
-  FiPieChart, 
-  FiBarChart2, 
-  FiList, 
-  FiTrendingUp, 
-  FiTrendingDown, 
-  FiTrash2, 
+import {
+  FiPieChart,
+  FiBarChart2,
+  FiList,
+  FiTrendingUp,
+  FiTrendingDown,
+  FiTrash2,
   FiDollarSign,
   FiEdit
 } from 'react-icons/fi';
-import { 
-  PieChart, 
-  Pie, 
-  Cell, 
-  ResponsiveContainer, 
+import {
+  PieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer,
   Tooltip as RechartsTooltip
 } from 'recharts';
 
@@ -29,37 +29,37 @@ const Portfolio = () => {
   const dispatch = useDispatch();
   const { assets } = useSelector((state) => state.wallet);
   const { prices, loading } = useSelector((state) => state.market);
-  
+
   // États locaux
   const [activeView, setActiveView] = useState('list'); // 'list', 'pie', 'allocation'
   const [selectedAsset, setSelectedAsset] = useState(null);
   const [showSellModal, setShowSellModal] = useState(false);
   const [sellAmount, setSellAmount] = useState('');
-  
+
   // Charger les prix des crypto-monnaies
   useEffect(() => {
     if (assets.length > 0) {
       const cryptoIds = assets.map(asset => asset.id);
       dispatch(fetchCryptoPrices(cryptoIds));
-      
+
       // Mettre à jour les prix toutes les 60 secondes
       const interval = setInterval(() => {
         dispatch(fetchCryptoPrices(cryptoIds));
       }, 60000);
-      
+
       return () => clearInterval(interval);
     }
   }, [assets, dispatch]);
-  
+
   // Formatage des valeurs monétaires
   const formatCurrency = useCallback((value) => {
-    return value.toLocaleString('fr-FR', { 
-      style: 'currency', 
+    return value.toLocaleString('fr-FR', {
+      style: 'currency',
       currency: 'EUR',
       maximumFractionDigits: 2
     });
   }, []);
-  
+
   // Calculer la valeur totale du portefeuille
   const calculatePortfolioValue = useCallback(() => {
     return assets.reduce((total, asset) => {
@@ -67,10 +67,10 @@ const Portfolio = () => {
       return total + (asset.amount * price);
     }, 0);
   }, [assets, prices]);
-  
+
   // Valeur totale du portefeuille
   const portfolioValue = useMemo(() => calculatePortfolioValue(), [calculatePortfolioValue]);
-  
+
   // Générer une couleur basée sur l'ID
   // IMPORTANT: Déplacé cette fonction avant son utilisation dans portfolioAllocation
   const getRandomColor = (id) => {
@@ -78,16 +78,16 @@ const Portfolio = () => {
     const hue = (id * 137.5) % 360; // Multiplier par un nombre premier pour une meilleure distribution
     return `hsl(${hue}, 70%, 50%)`;
   };
-  
+
   // Calculer la répartition du portefeuille
   const portfolioAllocation = useMemo(() => {
     if (!assets.length || !Object.keys(prices).length) return [];
-    
+
     return assets.map(asset => {
       const price = prices[asset.id] || {};
       const value = asset.amount * (price.price || 0);
       const percentage = (value / portfolioValue) * 100;
-      
+
       return {
         id: asset.id,
         name: price.name || 'Crypto',
@@ -98,14 +98,14 @@ const Portfolio = () => {
       };
     }).sort((a, b) => b.value - a.value); // Trier par valeur décroissante
   }, [assets, prices, portfolioValue]);
-  
+
   // Gérer la vente d'un actif
   const handleSellAsset = (asset) => {
     setSelectedAsset(asset);
     setSellAmount('');
     setShowSellModal(true);
   };
-  
+
   // Confirmer la vente
   const handleConfirmSell = () => {
     const parsedAmount = parseFloat(sellAmount);
@@ -118,21 +118,21 @@ const Portfolio = () => {
           price: prices[selectedAsset.id]?.price || 0
         }));
         setShowSellModal(false);
-        
+
         // Afficher une notification de succès (à implémenter)
       }
     }
   };
-  
+
   // Fonction d'aide pour le formatage des pourcentages
   const formatPercentage = (value) => {
     return `${value.toFixed(2)}%`;
   };
-  
+
   return (
     <div className="portfolio-container">
       <h1 className="portfolio-title">Mon Portefeuille</h1>
-      
+
       {/* Résumé du portefeuille */}
       <div className="portfolio-summary-card glass-effect">
         <div className="summary-item total-value">
@@ -151,10 +151,10 @@ const Portfolio = () => {
           </span>
         </div>
       </div>
-      
+
       {/* Contrôles de vue */}
       <div className="view-controls">
-        <button 
+        <button
           className={`view-control-btn ${activeView === 'list' ? 'active' : ''}`}
           onClick={() => setActiveView('list')}
           aria-label="Vue liste"
@@ -162,7 +162,7 @@ const Portfolio = () => {
           <FiList />
           <span>Liste</span>
         </button>
-        <button 
+        <button
           className={`view-control-btn ${activeView === 'pie' ? 'active' : ''}`}
           onClick={() => setActiveView('pie')}
           aria-label="Vue camembert"
@@ -170,7 +170,7 @@ const Portfolio = () => {
           <FiPieChart />
           <span>Répartition</span>
         </button>
-        <button 
+        <button
           className={`view-control-btn ${activeView === 'allocation' ? 'active' : ''}`}
           onClick={() => setActiveView('allocation')}
           aria-label="Vue allocation"
@@ -179,7 +179,7 @@ const Portfolio = () => {
           <span>Allocation</span>
         </button>
       </div>
-      
+
       {/* Contenu principal basé sur la vue active */}
       <div className="portfolio-content glass-effect">
         {loading && !Object.keys(prices).length ? (
@@ -196,7 +196,7 @@ const Portfolio = () => {
             <p className="empty-state-description">
               Vous n'avez pas encore d'actifs dans votre portefeuille. Commencez par explorer et ajouter des crypto-monnaies.
             </p>
-            <button 
+            <button
               className="btn btn-primary"
               onClick={() => window.location.href = '/explore'}
             >
@@ -224,17 +224,18 @@ const Portfolio = () => {
                       const price = prices[asset.id] || {};
                       const value = asset.amount * (price.price || 0);
                       const change24h = price.percent_change_24h || 0;
-                      
+
                       return (
                         <tr key={asset.id}>
+                          {/* Cellule 1: Nom et icône de l'actif */}
                           <td className="asset-name-cell">
                             <div className="asset-icon">
                               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path 
-                                  d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" 
-                                  stroke="currentColor" 
-                                  strokeWidth="2" 
-                                  strokeLinecap="round" 
+                                <path
+                                  d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                  strokeLinecap="round"
                                   strokeLinejoin="round"
                                 />
                               </svg>
@@ -244,24 +245,37 @@ const Portfolio = () => {
                               <div className="asset-symbol">{price.symbol || 'CRYPTO'}</div>
                             </div>
                           </td>
+
+                          {/* Cellule 2: Quantité */}
                           <td>{asset.amount}</td>
+
+                          {/* Cellule 3: Prix */}
                           <td>{formatCurrency(price.price || 0)}</td>
+
+                          {/* Cellule 4: Valeur */}
                           <td>{formatCurrency(value)}</td>
+
+                          {/* Cellule 5: Pourcentage de changement */}
                           <td className={change24h >= 0 ? 'change-positive' : 'change-negative'}>
-                            {change24h >= 0 ? <FiTrendingUp className="trend-icon" /> : <FiTrendingDown className="trend-icon" />}
+                            {change24h >= 0 ?
+                              <FiTrendingUp className="trend-icon" /> :
+                              <FiTrendingDown className="trend-icon" />
+                            }
                             {Math.abs(change24h).toFixed(2)}%
                           </td>
+
+                          {/* Cellule 6: Boutons d'action */}
                           <td className="action-buttons">
-                            <button 
+                            <button
                               className="btn-icon btn-action"
                               onClick={() => handleSellAsset(asset)}
                               aria-label={`Vendre ${price.name || 'Crypto'}`}
                             >
                               <FiDollarSign />
                             </button>
-                            <button 
+                            <button
                               className="btn-icon btn-action btn-danger"
-                              onClick={() => handleSellAsset({...asset, amount: asset.amount})}
+                              onClick={() => handleSellAsset({ ...asset, amount: asset.amount })}
                               aria-label={`Supprimer ${price.name || 'Crypto'}`}
                             >
                               <FiTrash2 />
@@ -274,7 +288,7 @@ const Portfolio = () => {
                 </table>
               </div>
             )}
-            
+
             {/* Vue Camembert */}
             {activeView === 'pie' && (
               <div className="pie-chart-view">
@@ -294,7 +308,7 @@ const Portfolio = () => {
                           <Cell key={`cell-${index}`} fill={entry.color} />
                         ))}
                       </Pie>
-                      <RechartsTooltip 
+                      <RechartsTooltip
                         formatter={(value) => [formatCurrency(value), 'Valeur']}
                         labelFormatter={(index) => portfolioAllocation[index].name}
                       />
@@ -317,7 +331,7 @@ const Portfolio = () => {
                 </div>
               </div>
             )}
-            
+
             {/* Vue Allocation */}
             {activeView === 'allocation' && (
               <div className="allocation-view">
@@ -327,11 +341,11 @@ const Portfolio = () => {
                       <div className="allocation-name">
                         <div className="asset-icon" style={{ backgroundColor: `${asset.color}20` }}>
                           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path 
-                              d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" 
-                              stroke={asset.color} 
-                              strokeWidth="2" 
-                              strokeLinecap="round" 
+                            <path
+                              d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"
+                              stroke={asset.color}
+                              strokeWidth="2"
+                              strokeLinecap="round"
                               strokeLinejoin="round"
                             />
                           </svg>
@@ -347,9 +361,9 @@ const Portfolio = () => {
                       </div>
                     </div>
                     <div className="allocation-bar-container">
-                      <div 
+                      <div
                         className="allocation-bar"
-                        style={{ 
+                        style={{
                           width: `${asset.percentage}%`,
                           backgroundColor: asset.color
                         }}
@@ -362,7 +376,7 @@ const Portfolio = () => {
           </>
         )}
       </div>
-      
+
       {/* Modal de vente */}
       {showSellModal && selectedAsset && (
         <div className="modal-overlay" onClick={() => setShowSellModal(false)}>
@@ -371,7 +385,7 @@ const Portfolio = () => {
               <h3 className="modal-title">
                 Vendre {prices[selectedAsset.id]?.name || 'Crypto'}
               </h3>
-              <button 
+              <button
                 className="modal-close"
                 onClick={() => setShowSellModal(false)}
                 aria-label="Fermer"
@@ -400,14 +414,14 @@ const Portfolio = () => {
                   </span>
                 </div>
               </div>
-              
+
               <div className="form-group amount-group">
                 <label htmlFor="sell-amount" className="form-label">
                   Quantité à vendre
                 </label>
                 <div className="input-with-actions">
-                  <input 
-                    type="number" 
+                  <input
+                    type="number"
                     id="sell-amount"
                     className="form-control"
                     value={sellAmount}
@@ -419,19 +433,19 @@ const Portfolio = () => {
                     autoFocus
                   />
                   <div className="input-actions">
-                    <button 
+                    <button
                       className="action-btn"
                       onClick={() => setSellAmount((selectedAsset.amount / 4).toString())}
                     >
                       25%
                     </button>
-                    <button 
+                    <button
                       className="action-btn"
                       onClick={() => setSellAmount((selectedAsset.amount / 2).toString())}
                     >
                       50%
                     </button>
-                    <button 
+                    <button
                       className="action-btn"
                       onClick={() => setSellAmount(selectedAsset.amount.toString())}
                     >
@@ -440,7 +454,7 @@ const Portfolio = () => {
                   </div>
                 </div>
               </div>
-              
+
               {sellAmount && (
                 <div className="sell-summary">
                   <div className="summary-row">
@@ -459,13 +473,13 @@ const Portfolio = () => {
               )}
             </div>
             <div className="modal-footer">
-              <button 
+              <button
                 className="btn btn-secondary"
                 onClick={() => setShowSellModal(false)}
               >
                 Annuler
               </button>
-              <button 
+              <button
                 className="btn btn-primary"
                 onClick={handleConfirmSell}
                 disabled={!sellAmount || parseFloat(sellAmount) <= 0 || parseFloat(sellAmount) > selectedAsset.amount}

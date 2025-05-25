@@ -1,57 +1,25 @@
 <!DOCTYPE html>
 <html lang="fr">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Application de gestion de portefeuille de crypto-monnaies avec un design glassmorphique moderne" />
-    <meta name="theme-color" content="#00D09E" />
-    
-    <!-- Polices Google -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
-    <title>Crypto Science | Gérez vos crypto-monnaies</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    
-    <!-- Script principal -->
-    <script type="module" src="/src/main.jsx"></script>
-    
-    <!-- Favicon SVG -->
-    <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
-      <symbol id="favicon" viewBox="0 0 24 24">
-        <circle cx="12" cy="12" r="10" fill="#00D09E" opacity="0.7" />
-        <path 
-          d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" 
-          stroke="#347591" 
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          fill="none"
-        />
-        <path 
-          d="M9 8h6m-6 4h6m-6 4h6" 
-          stroke="#347591" 
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        />
-      </symbol>
-    </svg>
-    
-    <!-- Générer favicon.svg -->
-    <script>
-      // Générer dynamiquement le favicon.svg
-      if (!document.querySelector('link[rel="icon"]').href.startsWith('data:')) {
-        const svgString = new XMLSerializer().serializeToString(
-          document.querySelector('symbol#favicon')
-        );
-        const svgDataUri = `data:image/svg+xml;base64,${btoa(svgString)}`;
-        document.querySelector('link[rel="icon"]').href = svgDataUri;
-      }
-    </script>
-  </body>
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/svg+xml" href="/Logo.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Crypto Science Votre Application de gestion de cryptos">
+  <title>Accenty & Co | Planificateur d'événements</title>
+  
+  <!-- Nouvelles polices Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- General Sans via CDN (car non disponible sur Google Fonts) -->
+  <link href="https://api.fontshare.com/v2/css?f[]=general-sans@500,600,400,700&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome pour les icônes -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
+</head>
+<body>
+  <div id="root"></div>
+  <!-- Scripts seront injectés ici par Vite -->
+</body>
 </html>

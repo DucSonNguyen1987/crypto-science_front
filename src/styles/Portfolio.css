@@ -474,3 +474,100 @@
   max-width: 400px;
   margin: 0 auto var(--spacing-md);
 }
+
+/* Amélioration du style pour les boutons d'action dans le tableau */
+.portfolio-table td.action-buttons {
+  white-space: nowrap;
+  text-align: right; /* Aligner les boutons à droite */
+  min-width: 100px; /* Assurer un espace minimum */
+  padding-right: var(--spacing-md);
+}
+
+/* Style amélioré pour les boutons d'action */
+.btn-icon.btn-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  margin: 0 var(--spacing-xs);
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.7);
+  transition: var(--transition-fast);
+}
+
+/* Styles spécifiques pour le bouton de vente */
+.btn-icon.btn-action:first-child {
+  color: var(--color-primary);
+  border: 1px solid rgba(0, 208, 158, 0.2);
+}
+
+.btn-icon.btn-action:first-child:hover {
+  background-color: rgba(0, 208, 158, 0.1);
+  transform: scale(1.1);
+}
+
+/* Styles spécifiques pour le bouton de suppression */
+.btn-icon.btn-action.btn-danger {
+  color: var(--color-error);
+  border: 1px solid rgba(255, 120, 104, 0.2);
+}
+
+
+/* Style pour rendre les bordures du tableau plus visibles pour le débogage */
+.portfolio-table {
+  border-collapse: separate;  /* Au lieu de collapse */
+  border-spacing: 0;          /* Pas d'espace entre les cellules */
+}
+
+.portfolio-table th,
+.portfolio-table td {
+  border: 1px solid rgba(255, 255, 255, 0.2);  /* Bordure visible pour le débogage */
+  padding: var(--spacing-md);
+}
+
+/* Assurez-vous que chaque cellule a une largeur minimale */
+.portfolio-table th:nth-child(1),
+.portfolio-table td:nth-child(1) {
+  width: 25%;  /* Cellule Actif */
+}
+
+.portfolio-table th:nth-child(2),
+.portfolio-table td:nth-child(2) {
+  width: 15%;  /* Cellule Quantité */
+}
+
+.portfolio-table th:nth-child(3),
+.portfolio-table td:nth-child(3) {
+  width: 15%;  /* Cellule Prix */
+}
+
+.portfolio-table th:nth-child(4),
+.portfolio-table td:nth-child(4) {
+  width: 15%;  /* Cellule Valeur */
+}
+
+.portfolio-table th:nth-child(5),
+.portfolio-table td:nth-child(5) {
+  width: 15%;  /* Cellule 24h % */
+}
+
+.portfolio-table th:nth-child(6),
+.portfolio-table td:nth-child(6) {
+  width: 15%;  /* Cellule Actions */
+}
+
+/* Style spécifique pour la cellule de pourcentage */
+.portfolio-table td.change-positive,
+.portfolio-table td.change-negative {
+  white-space: nowrap;
+  text-align: right;
+}
+
+/* Style pour la cellule des boutons d'action */
+.portfolio-table td.action-buttons {
+  white-space: nowrap;
+  text-align: center;
+  background-color: rgba(255, 255, 255, 0.05); /* Pour le rendre distinct */
+}
